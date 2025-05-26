@@ -69,14 +69,14 @@ def delete_image_from_gcs(blob_name, bucket_name):
 
         if blob.exists():
             blob.delete()
-            print(f"GCS에서 이미지가 성공적으로 삭제되었습니다.")
+            # print(f"GCS에서 이미지가 성공적으로 삭제되었습니다.")
             return True
         
         else:
-            print(f"해당 blob_name을 가진 이미지가 GCS에 존재하지 않습니다.")
+            # print(f"해당 blob_name을 가진 이미지가 GCS에 존재하지 않습니다.")
             return False
     except Exception as e:
-        print(f"GCS에서 이미지를 삭제하는데 실패했습니다.: {e}")
+        # print(f"GCS에서 이미지를 삭제하는데 실패했습니다.: {e}")
         return False
 
 
@@ -171,7 +171,7 @@ def image_detail_view(request, blob_name):
             
         except Exception as db_e:
             # GCS는 삭제되었는데 DB 삭제 실패
-            print(f"이미지 메타데이터 삭제 중 문제가 발생했습니다.: {db_e}")
+            # print(f"이미지 메타데이터 삭제 중 문제가 발생했습니다.: {db_e}")
             return Response(
                 {'error': 'GCS에서 이미지는 삭제되었으나, 데이터베이스 메타데이터 삭제에 실패했습니다. 관리자에게 문의하세요.'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR 
