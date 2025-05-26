@@ -37,13 +37,16 @@ def generate_signed_url(bucket_name, blob_name, expiration_minutes=10):
     bucket = client.bucket(bucket_name)
     blob = bucket.blob(blob_name)
     
-    url = blob.generate_signed_url(
-        version='v4',
-        expiration=timedelta(minutes=expiration_minutes),
-        method='GET'
-    )
+    if blob.exists(): 
+        url = blob.generate_signed_url(
+            version='v4',
+            expiration=timedelta(minutes=expiration_minutes),
+            method='GET'
+        )
 
-    return url
+        return url
+    
+    return None
 
 
 """
@@ -151,30 +154,31 @@ def image_detail_view(request, blob_name):
             )
 
     elif request.method == 'DELETE':
-        if delete_image_from_gcs(blob_name, bucket_name):
-            try:
-                with transaction.atomic():
-                    image_metadata.delete() 
-                    print(f"이미지 메타데이터가 성공적으로 삭제되었습니다.")
+        try:
+            with transaction.atomic():
+                # DB 메타데이터 삭제
+                image_metadata.delete() 
 
-                    # DB 삭제가 성공하면 GCS 파일 삭제
-                    gcs_deleted = delete_image_from_gcs(blob_name, bucket_name)
-                    
-                    if not gcs_deleted:
-                        # GCS 삭제가 실패하면, DB 트랜잭션을 강제로 롤백하기 위해 예외 발생
-                        raise Exception(f"GCS에서 이미지를 삭제하던 도중 오류가 발생했습니다.")
-                return Response(status=status.HTTP_204_NO_CONTENT) # GCS와 DB 모두 성공적으로 삭제
-            
-            except Exception as db_e:
-                # GCS는 삭제되었는데 DB 삭제 실패
-                print(f"이미지 메타데이터 삭제 중 문제가 발생했습니다.: {db_e}")
-                return Response(
-                    {'error': 'GCS에서 이미지는 삭제되었으나, 데이터베이스 메타데이터 삭제에 실패했습니다. 관리자에게 문의하세요.'},
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR 
-                )
-        else:
-            # GCS 삭제 자체가 실패한 경우
+                # DB 삭제가 성공하면 GCS 파일 삭제
+                gcs_deleted = delete_image_from_gcs(blob_name, bucket_name)
+                
+                if not gcs_deleted:
+                    # GCS 삭제가 실패하면, DB 트랜잭션을 강제로 롤백하기 위해 예외 발생
+                    raise Exception(f"GCS에서 이미지를 삭제하던 도중 오류가 발생했습니다.")
             return Response(
-                {'error': '이미지를 삭제하던 도중 문제가 발생했습니다.'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                {'message': '성공적으로 이미지를 GCS에 업로드하고, 메타데이터를 저장했습니다.'},
+                status=status.HTTP_204_NO_CONTENT) # GCS와 DB 모두 성공적으로 삭제
+            
+        except Exception as db_e:
+            # GCS는 삭제되었는데 DB 삭제 실패
+            print(f"이미지 메타데이터 삭제 중 문제가 발생했습니다.: {db_e}")
+            return Response(
+                {'error': 'GCS에서 이미지는 삭제되었으나, 데이터베이스 메타데이터 삭제에 실패했습니다. 관리자에게 문의하세요.'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR 
             )
+    else:
+        # GCS 삭제 자체가 실패한 경우
+        return Response(
+            {'error': '이미지를 삭제하던 도중 문제가 발생했습니다.'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
