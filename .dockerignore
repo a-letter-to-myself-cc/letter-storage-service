@@ -1,0 +1,8 @@
+.git
+.venv/
+__pycache__/
+*.pyc
+*.log
+.DS_Store
+node_modules/ # 만약 프론트엔드 빌드 아티팩트가 있다면
+.env
