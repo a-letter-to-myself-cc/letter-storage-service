@@ -91,11 +91,11 @@ WSGI_APPLICATION = 'letter_storage_service.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': 'password',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': os.environ.get('LETTER_STORAGE_DB_NAME'),
+        'USER': os.environ.get('LETTER_STORAGE_DB_USER'),
+        'PASSWORD': os.environ.get('LETTER_STORAGE_DB_PASSWORD'),
+        'HOST': os.environ.get('LETTER_STORAGE_DB_HOST'),
+        'PORT': os.environ.get('LETTER_STORAGE_DB_PORT'),
     }
 }
 
@@ -135,9 +135,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static")  # letter_project/static
-]
+# STATICFILES_DIRS = [
+#     os.path.join(BASE_DIR, "static")  # letter_project/static
+# ]
 
 
 
