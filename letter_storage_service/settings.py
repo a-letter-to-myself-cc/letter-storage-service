@@ -11,8 +11,10 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 import os
 import sys
+import json
 from dotenv import load_dotenv
 from pathlib import Path
+from google.oauth2 import service_account
 
 # BASE_DIR 설정
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,15 +23,39 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # 안 해주면 모놀리식 실행 시 'No module named emotions' 같은 import 에러 뜸 
 sys.path.append(str(BASE_DIR))
 
-# .env 파일 로드
-load_dotenv(os.path.join(BASE_DIR, '.env'))
+# DEBUG 환경 변수를 사용하여 개발 환경인지 판단
+if os.getenv('DEBUG') == 'True': # DEBUG가 True일 때만 .env 로드
+    load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 SECRET_KEY = os.getenv('SECRET_KEY')
-DEBUG = os.getenv('DEBUG') == 'True'
-# OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 
 # gcp 버킷 환경변수 설정
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.path.join(BASE_DIR, 'gcs-key.json')
+# os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.path.join(BASE_DIR, 'gcs-key.json')
+
+# GCP 버킷 환경변수 설정 및 GCS 클라이언트 인증 객체 준비 
+GCP_SERVICE_ACCOUNT_CREDENTIALS_JSON_STRING = os.getenv('GOOGLE_APPLICATION_CREDENTIALS_JSON')
+
+# GCS 클라이언트 인증 객체와 GCS 프로젝트 ID None으로 초기화
+GCS_CREDENTIALS = None
+GCP_PROJECT_ID = None
+
+if GCP_SERVICE_ACCOUNT_CREDENTIALS_JSON_STRING:
+    try:
+        # 환경 변수에서 JSON 문자열을 파싱
+        GCP_SERVICE_ACCOUNT_INFO = json.loads(GCP_SERVICE_ACCOUNT_CREDENTIALS_JSON_STRING)
+
+        # google-oauth2의 Credentials 객체 생성
+        GCS_CREDENTIALS = service_account.Credentials.from_service_account_info(GCP_SERVICE_ACCOUNT_INFO)
+
+        # JSON 정보에서 프로젝트 ID 추출
+        GCP_PROJECT_ID = GCP_SERVICE_ACCOUNT_INFO.get('project_id')
+
+    except json.JSONDecodeError: # 유효하지 않은 JSON 처리
+        print("GOOGLE_APPLICATION_CREDENTIALS_JSON이 유효한 JSON 문자열이 아닙니다.")
+        
+else: # 환경 변수가 없을 경우 -> GCS_CREDENTIALS는 None으로 유지되어 ADC가 자동으로 시도될 수 있다.
+    print("GOOGLE_APPLICATION_CREDENTIALS_JSON 환경변수가 존재하지 않습니다.")
+
 BUCKET_NAME = os.getenv('BUCKET_NAME')
 
 # Quick-start development settings - unsuitable for production
@@ -37,9 +63,12 @@ BUCKET_NAME = os.getenv('BUCKET_NAME')
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '[::1]',
+    'letter-storage-service',
+]
 
 # Application definition
 
@@ -91,11 +120,11 @@ WSGI_APPLICATION = 'letter_storage_service.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('LETTER_STORAGE_DB_NAME'),
-        'USER': os.environ.get('LETTER_STORAGE_DB_USER'),
-        'PASSWORD': os.environ.get('LETTER_STORAGE_DB_PASSWORD'),
-        'HOST': os.environ.get('LETTER_STORAGE_DB_HOST'),
-        'PORT': os.environ.get('LETTER_STORAGE_DB_PORT'),
+        'NAME': os.getenv('LETTER_STORAGE_DB_NAME'),
+        'USER': os.getenv('LETTER_STORAGE_DB_USER'),
+        'PASSWORD': os.getenv('LETTER_STORAGE_DB_PASSWORD'),
+        'HOST': os.getenv('LETTER_STORAGE_DB_HOST'),
+        'PORT': os.getenv('LETTER_STORAGE_DB_PORT'),
     }
 }
 
