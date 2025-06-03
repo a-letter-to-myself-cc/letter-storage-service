@@ -1,6 +1,7 @@
 services:
   letter-storage-db:
     image: postgres:14
+    container_name: letter-storage-db
     environment:
       POSTGRES_DB: ${LETTER_STORAGE_DB_NAME}
       POSTGRES_USER: ${LETTER_STORAGE_DB_USER}
@@ -8,20 +9,26 @@ services:
     networks:
       - letter-storage-net
     ports:
-      - "5432:5432"
+      - "5434:5432"
     volumes:
       - letter-storage-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${LETTER_STORAGE_DB_USER} -d ${LETTER_STORAGE_DB_NAME}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   letter-storage-service:
-    # image: letter-storage-service-img
     build: . # 현재 디렉토리의 Dockerfile을 사용하여 이미지를 빌드
+    container_name: letter-storage-service
     env_file: .env
     networks:
       - letter-storage-net
     ports:
       - "8007:8000"
     depends_on:
-      - letter-storage-db
+      letter-storage-db:
+        condition: service_healthy # healthcheck 기반 의존
 
 networks:
   letter-storage-net:
