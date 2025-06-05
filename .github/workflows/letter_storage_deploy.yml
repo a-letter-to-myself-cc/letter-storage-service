@@ -30,7 +30,7 @@ jobs:
           uses: docker/build-push-action@v4
           with:
             context: ./letter_storage_service
-            file: ./letter_storage_service/Dockerfile
+            file: ./Dockerfile
             push: true
             tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
             build-args: |
