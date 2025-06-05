@@ -33,7 +33,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.path.join(BASE_DIR, 'gcs-key.json')
 
 # GCP 버킷 환경변수 설정 및 GCS 클라이언트 인증 객체 준비 
-GCP_SERVICE_ACCOUNT_CREDENTIALS_JSON_STRING = os.getenv('GOOGLE_APPLICATION_CREDENTIALS_JSON')
+GCP_SERVICE_ACCOUNT_CREDENTIALS_JSON_STRING = os.getenv('GCP_SA_KEY')
 
 # GCS 클라이언트 인증 객체와 GCS 프로젝트 ID None으로 초기화
 GCS_CREDENTIALS = None

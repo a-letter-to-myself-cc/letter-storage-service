@@ -1,0 +1,68 @@
+# docker image 빌드 & GKE에 배포하는 github actions 파일
+
+name: CI/CD for Letter Storage Service
+
+on:
+    push:
+        branches: [main]
+
+env:
+    IMAGE_NAME: letter-storage-service
+
+jobs:
+    build-and-deploy:
+        runs-on: ubuntu-latest
+
+        steps:
+        - name: Checkout source code        
+          uses: actions/checkout@v3
+        
+        - name: Set up Docker Buildx
+          uses: docker/setup-buildx-action@v2
+
+        - name: Log in to Docker Hub
+          uses: docker/login-action@v2
+          with:
+            username: ${{ secrets.DOCKERHUB_USERNAME }}
+            password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+        - name: Build and push Docker image to Docker Hub
+          uses: docker/build-push-action@v4
+          with:
+            context: ./letter_storage_service
+            file: ./letter_storage_service/Dockerfile
+            push: true
+            tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+            build-args: |
+              DB_HOST=${{ secrets.LETTER_DB_NAME }}
+              DB_USER=${{ secrets.LETTER_DB_USERNAME }}
+              DB_PASSWORD=${{ secrets.LETTER_DB_PASSWORD }}
+              DB_NAME=${{ secrets.LETTER_DB_HOST }}
+
+        - name: Set up Google Cloud SDK
+          uses: google-github-actions/setup-gcloud@v1
+          with:
+            project_id: ${{ secrets.GCP_PROJECT_ID }}
+            service_account_key: ${{ secrets.GCP_SA_KEY }}
+
+        - name: Get GKE credentials
+          run: |
+            gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER }} --zone ${{ secrets.GKE_ZONE }}
+
+
+        - name: Create Kubernetes Secret
+          run: |
+            kubectl create secret generic letter-storage-secret \
+            --from-literal=SECRET_KEY="${{ secrets.SECRET_KEY }}" \
+            --from-literal=BUCKET_NAME="${{ secrets.BUCKET_NAME }}" \
+            --from-literal=LETTER_STORAGE_DB_HOST="${{ secrets.LETTER_STORAGE_DB_HOST }}" \
+            --from-literal=LETTER_STORAGE_DB_PORT="${{ secrets.LETTER_STORAGE_DB_PORT }}" \
+            --from-literal=LETTER_STORAGE_DB_NAME="${{ secrets.LETTER_STORAGE_DB_NAME }}" \
+            --from-literal=LETTER_STORAGE_DB_USER="${{ secrets.LETTER_STORAGE_DB_USER }}" \
+            --from-literal=LETTER_STORAGE_DB_PASSWORD="${{ secrets.LETTER_STORAGE_DB_PASSWORD }}" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+        - name: Deploy to GKE
+          run: |
+            kubectl apply -f ./k8s/deployment.yaml
+            kubectl apply -f ./k8s/service.yaml

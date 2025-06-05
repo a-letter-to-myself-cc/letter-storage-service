@@ -1,0 +1,62 @@
+# Django 앱을 배포할 k8s deployment manifest
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: letter-storage-deployment
+  labels:
+    app: letter-storage
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: letter-storage
+  template:
+    metadata:
+      labels:
+        app: letter-storage
+    spec:
+      containers:
+      - name: letter-storage-service
+        image: hyomee2/letter-storage-service:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: letter-storage-secret
+              key: SECRET_KEY
+        - name: BUCKET_NAME
+          valueFrom:
+            secretKeyRef:
+              name: letter-storage-secret
+              key: BUCKET_NAME
+        - name: LETTER_STORAGE_DB_HOST
+          valueFrom:
+            secretKeyRef:
+              name: letter-storage-secret
+              key: LETTER_STORAGE_DB_HOST
+        - name: LETTER_STORAGE_DB_PORT
+          valueFrom:
+            secretKeyRef:
+              name: letter-storage-secret
+              key: LETTER_STORAGE_DB_PORT
+        - name: LETTER_STORAGE_DB_NAME
+          valueFrom:
+            secretKeyRef:
+              name: letter-storage-secret
+              key: LETTER_STORAGE_DB_NAME
+        - name: LETTER_STORAGE_DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: letter-storage-secret
+              key: LETTER_STORAGE_DB_USER
+        - name: LETTER_STORAGE_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: letter-storage-secret
+              key: LETTER_STORAGE_DB_PASSWORD
+      volumes:
+      - name: gcp-secret-volume
+        secret:
+          secretName: gcp-secret
