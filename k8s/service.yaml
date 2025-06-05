@@ -1,0 +1,12 @@
+# Django 앱에 접근할 수 이쓴 k8s service manifestapiVersion: v1
+kind: Service
+metadata:
+  name: letter-storage-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: letter-storage
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
