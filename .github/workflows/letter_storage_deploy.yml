@@ -67,7 +67,7 @@ jobs:
             --from-literal=LETTER_STORAGE_DB_NAME="${{ secrets.LETTER_STORAGE_DB_NAME }}" \
             --from-literal=LETTER_STORAGE_DB_USER="${{ secrets.LETTER_STORAGE_DB_USER }}" \
             --from-literal=LETTER_STORAGE_DB_PASSWORD="${{ secrets.LETTER_STORAGE_DB_PASSWORD }}" \
-            --from-literal=GCP_SA_KEY="${{ secrets.GCP_SA_KEY }}" \
+            --from-file=GCP_SA_KEY="${{ secrets.GCP_SA_KEY }}" \
             --dry-run=client -o yaml | kubectl apply -f -
 
         - name: Deploy to GKE
