@@ -59,6 +59,9 @@ jobs:
 
         - name: Create Kubernetes Secret
           run: |
+            # GCP 서비스 계정 키를 임시 파일에 저장 (json 형식임으로 이 과정이 필요요)
+            echo "${{ secrets.GCP_SA_KEY }}" > /tmp/gcp_sa_key.json
+            
             kubectl create secret generic letter-storage-secret \
             --from-literal=SECRET_KEY="${{ secrets.SECRET_KEY }}" \
             --from-literal=BUCKET_NAME="${{ secrets.BUCKET_NAME }}" \
@@ -67,7 +70,7 @@ jobs:
             --from-literal=LETTER_STORAGE_DB_NAME="${{ secrets.LETTER_STORAGE_DB_NAME }}" \
             --from-literal=LETTER_STORAGE_DB_USER="${{ secrets.LETTER_STORAGE_DB_USER }}" \
             --from-literal=LETTER_STORAGE_DB_PASSWORD="${{ secrets.LETTER_STORAGE_DB_PASSWORD }}" \
-            --from-file=GCP_SA_KEY="${{ secrets.GCP_SA_KEY }}" \
+            --from-file=GCP_SA_KEY="/tmp/gcp_sa_key.json" \
             --dry-run=client -o yaml | kubectl apply -f -
 
         - name: Deploy to GKE
