@@ -18,7 +18,7 @@ bucket_name=settings.BUCKET_NAME
 파일 객체를 GCS에 업로드하고 저장된 blob_name을 반환
 """
 def upload_image_to_gcs(file, bucket_name):
-    client = storage.Client()
+    client = storage.Client(project=settings.GCP_PROJECT_ID, credentials=settings.GCS_CREDENTIALS) # project와 credentials 명시
     bucket = client.bucket(bucket_name)
 
     # 고유 파일명 생성
@@ -33,7 +33,7 @@ def upload_image_to_gcs(file, bucket_name):
 GCS에 저장된 blob_name에 대한 서명된 URL 생성
 """
 def generate_signed_url(bucket_name, blob_name, expiration_minutes=10):
-    client = storage.Client()
+    client = storage.Client(project=settings.GCP_PROJECT_ID, credentials=settings.GCS_CREDENTIALS) # project와 credentials 명시
     bucket = client.bucket(bucket_name)
     blob = bucket.blob(blob_name)
     
@@ -63,7 +63,7 @@ GCS에서 지정된 blob(이미지 파일)을 삭제
 """
 def delete_image_from_gcs(blob_name, bucket_name):
     try:
-        client = storage.Client() 
+        client = storage.Client(project=settings.GCP_PROJECT_ID, credentials=settings.GCS_CREDENTIALS) # project와 credentials 명시
         bucket = client.bucket(bucket_name)
         blob = bucket.blob(blob_name)
 
