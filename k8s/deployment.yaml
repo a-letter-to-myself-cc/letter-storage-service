@@ -56,6 +56,11 @@ spec:
             secretKeyRef:
               name: letter-storage-secret
               key: LETTER_STORAGE_DB_PASSWORD
+        - name: GCP_SA_KEY
+          valueFrom:
+            secretKeyRef:
+              name: letter-storage-secret
+              key: GCP_SA_KEY
       volumes:
       - name: gcp-secret-volume
         secret:
