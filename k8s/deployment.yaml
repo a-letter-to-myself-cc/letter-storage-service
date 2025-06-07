@@ -4,7 +4,7 @@ kind: Deployment
 metadata:
   name: letter-storage-deployment
   labels:
-    app: letter-storage
+    app: letter-storage-service
 spec:
   replicas: 1
   selector:
