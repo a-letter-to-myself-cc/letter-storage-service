@@ -23,9 +23,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # 안 해주면 모놀리식 실행 시 'No module named emotions' 같은 import 에러 뜸 
 sys.path.append(str(BASE_DIR))
 
-# DEBUG 환경 변수를 사용하여 개발 환경인지 판단
-if os.getenv('DEBUG') == 'True': # DEBUG가 True일 때만 .env 로드
-    load_dotenv(os.path.join(BASE_DIR, '.env'))
+# # DEBUG 환경 변수를 사용하여 개발 환경인지 판단
+# if os.getenv('DEBUG') == 'True': # DEBUG가 True일 때만 .env 로드
+#     load_dotenv(os.path.join(BASE_DIR, '.env'))
+
+DEBUG_STR = os.getenv('DEBUG', 'False') # 환경 변수 DEBUG 값을 가져오고, 없으면 'False' 문자열을 기본값으로 사용
+DEBUG = DEBUG_STR.lower() == 'true'
 
 SECRET_KEY = os.getenv('SECRET_KEY')
 
