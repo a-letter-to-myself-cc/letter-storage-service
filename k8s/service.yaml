@@ -6,7 +6,7 @@ metadata:
 spec:
   type: LoadBalancer
   selector:
-    app: letter-storage
+    app: letter-storage-service
   ports:
     - protocol: TCP
       port: 80
