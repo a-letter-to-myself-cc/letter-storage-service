@@ -1,26 +1,32 @@
-# Django 앱을 배포할 k8s deployment manifest
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: letter-storage-deployment
   labels:
-    app: letter-storage-service
+    app: letter-storage-service # <--- 1. 통일
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: letter-storage
+      app: letter-storage-service # <--- 1. 통일
   template:
     metadata:
       labels:
-        app: letter-storage
+        app: letter-storage-service # <--- 1. 통일
     spec:
       containers:
       - name: letter-storage-service
         image: hyomee2/letter-storage-service:latest
         ports:
-        - containerPort: 8000
+        - containerPort: 8007 # <--- 2. 포트 수정 (8000 -> 8007)
         env:
+        # GCP 인증 정보 주입
+        - name: GOOGLE_APPLICATION_CREDENTIALS_JSON # <--- 3. 환경변수 이름 수정
+          valueFrom:
+            secretKeyRef:
+              name: letter-storage-secret
+              key: GCP_SA_KEY
+        # 나머지 환경 변수들...
         - name: SECRET_KEY
           valueFrom:
             secretKeyRef:
@@ -56,12 +62,3 @@ spec:
             secretKeyRef:
               name: letter-storage-secret
               key: LETTER_STORAGE_DB_PASSWORD
-        - name: GCP_SA_KEY
-          valueFrom:
-            secretKeyRef:
-              name: letter-storage-secret
-              key: GCP_SA_KEY
-      volumes:
-      - name: gcp-secret-volume
-        secret:
-          secretName: gcp-secret
