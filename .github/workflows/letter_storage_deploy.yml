@@ -4,14 +4,15 @@ name: CI/CD for Letter Storage Service
 
 on:
     push:
-        branches: [main]
+        branches: [dev/jimin]
 
 env:
-    IMAGE_NAME: letter-storage-service
+    IMAGE_NAME: letter-storage-service-test
 
 jobs:
     build-and-deploy:
         runs-on: ubuntu-latest
+        enviroment: dev-jimin
 
         steps:
         - name: Checkout source code        
