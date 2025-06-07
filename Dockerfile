@@ -31,4 +31,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 # 나머지 애플리케이션 파일 복사
 COPY . .
 
-CMD ["gunicorn", "letter_storage_service.wsgi:application", "--bind", "0.0.0.0:8000"]
+CMD ["gunicorn", "letter_storage_service.wsgi:application", "--bind", "0.0.0.0:8007"]
