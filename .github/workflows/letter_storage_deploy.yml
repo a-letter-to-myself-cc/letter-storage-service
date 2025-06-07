@@ -7,7 +7,7 @@ on:
         branches: [dev/jimin]
 
 env:
-    IMAGE_NAME: letter-storage-service-test
+    IMAGE_NAME: letter-storage-service
 
 jobs:
     build-and-deploy:
