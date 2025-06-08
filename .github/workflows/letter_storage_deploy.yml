@@ -75,6 +75,8 @@ jobs:
             --dry-run=client -o yaml | kubectl apply -f -
 
         - name: Deploy to GKE
+          env:
+            GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }} 
           run: |
             kubectl apply -f ./k8s/deployment.yaml
             kubectl apply -f ./k8s/service.yaml
