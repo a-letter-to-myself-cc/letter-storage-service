@@ -21,11 +21,11 @@ spec:
         - containerPort: 8007 # <--- 2. 포트 수정 (8000 -> 8007)
         env:
         # GCP 인증 정보 주입
-        - name: GOOGLE_APPLICATION_CREDENTIALS_JSON # <--- 3. 환경변수 이름 수정
-          valueFrom:
-            secretKeyRef:
-              name: letter-storage-secret
-              key: GCP_SA_KEY
+        # - name: GOOGLE_APPLICATION_CREDENTIALS_JSON # <--- 3. 환경변수 이름 수정
+        #   valueFrom:
+        #     secretKeyRef:
+        #       name: letter-storage-secret
+        #       key: GCP_SA_KEY
         # 나머지 환경 변수들...
         - name: SECRET_KEY
           valueFrom:
@@ -62,3 +62,12 @@ spec:
             secretKeyRef:
               name: letter-storage-secret
               key: LETTER_STORAGE_DB_PASSWORD
+        - name: GCP_SA_KEY
+          valueFrom:
+            secretKeyRef:
+              name: letter-storage-secret
+              key: GCP_SA_KEY
+      volumes:
+      - name: gcp-secret-volume
+        secret:
+          secretName: gcp-secret
