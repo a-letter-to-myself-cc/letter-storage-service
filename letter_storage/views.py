@@ -2,6 +2,8 @@ from rest_framework.decorators import api_view, parser_classes
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser, FormParser 
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 
 from google.cloud import storage 
 import uuid
@@ -82,6 +84,10 @@ def delete_image_from_gcs(blob_name, bucket_name):
 
 
 # --------- API 함수 뷰 ---------
+@csrf_exempt
+def health_check(request):
+    return JsonResponse({'status': 'ok'})
+
 @api_view(['POST'])
 @parser_classes([MultiPartParser, FormParser]) # 파일 업로드를 위한 파서 지정
 def image_upload_view(request):
