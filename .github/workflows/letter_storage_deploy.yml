@@ -33,7 +33,7 @@ jobs:
             context: ./
             file: ./Dockerfile
             push: true
-            tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+            tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:v1
             build-args: |
               DB_HOST=${{ secrets.LETTER_DB_NAME }}
               DB_USER=${{ secrets.LETTER_DB_USERNAME }}
