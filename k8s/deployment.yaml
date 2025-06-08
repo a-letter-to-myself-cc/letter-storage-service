@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: letter-storage-service
-        image: jimin07/letter-storage-service:latest
+        image: jimin07/letter-storage-service:v1
         ports:
         - containerPort: 8007 # <--- 2. 포트 수정 (8000 -> 8007)
         env:
